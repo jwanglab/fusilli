@@ -200,9 +200,9 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                         #     # g_val = [cg1, cg0]
                             r_val = (a1, a0)
                         # if the read has already been used in a supporting alignment pair, skip, since we are counting only the number of supporting reads
-                        if (len(fr_lookup[key])!= 0):
-                            if r_val[0].q == fr_lookup[key][0][0].q:
-                                continue
+                        # if (len(fr_lookup[key])!= 0):
+                        #     if r_val[0].q == fr_lookup[key][0][0].q:
+                        #         continue
                         # fg_lookup[key] =  g_val
                         fr_lookup[key].append(r_val)
                         # win_lookup[key] = defaultdict(list)
@@ -282,7 +282,7 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     else:
         results['overall_filt_tf'] = True
     
-    # count the number of distinct reads, passing filters supporting each fusion 
+    # count the number of distinct passing-all-filters reads supporting each fusion 
     ct_lkup = results.loc[results.overall_filt_tf == True, ['fusion', 'read_query']].groupby('fusion')['read_query'].nunique().reset_index(name='ct')
     results['ct'] = results['fusion'].map(ct_lkup.set_index('fusion')['ct'])
     results['ct_tf'] = results['ct'].apply(lambda x: x >= min_ct)
