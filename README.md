@@ -43,6 +43,7 @@ cd <path_to_fusilli_github_repo>
 ```
 conda create -n fusilli
 conda activate fusilli
+conda install pip
 pip install -r requirements.txt
 ```
 
