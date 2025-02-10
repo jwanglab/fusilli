@@ -384,11 +384,11 @@ Each column is explained below:
 |aln_dist_rd|the distance in bp between alignments on a read corresponding to `-mxg, --maxgap` and `-mxo, --maxoverlap` filters; positive numbers represent overlap and negative numbers represent separation|
 |aln_dist_rd_tf|boolean if is passes (TRUE) or fails  (FALSE) the `-mxg, --maxgap` and `-mxo, --maxoverlap` filters; if alignments overlap, the aln_dist_rd distance is converted to a positive number and must be <= `--maxoverlap` to pass|
 |target_dist|if gene targets on the same chromsome, the amount in bp they overlap; corresponds to the `-mxgo, --maxgapoverlap` filter; positive numbers represent overlap and negative numbers represent separation; if the gene targets are on separate chromsome, nothing is populated in this column|
-|target_dist_tf|boolean if is passes (TRUE) or fails  (FALSE) the `-mxgo, --maxgapoverlap` filter|??
-|ovlp_perc_aln0|chromsome number of gene1|??
-|ovlp_perc_aln0_tf|chromsome number of gene1|??
-|ovlp_perc_aln1|chromsome number of gene1|??
-|ovlp_perc_aln1_tf|chromsome number of gene1|??
+|target_dist_tf|boolean if is passes (TRUE) or fails  (FALSE) the `-mxgo, --maxgapoverlap` filter; if overlapping, `target_dist` must be <= `maxgapoverlap` to pass. if alignments are separated, this automatically returns TRUE|
+|ovlp_perc_aln0|the % of overlapping alignment block with respect to `aln0`; if negative, the alignments are separated|
+|ovlp_perc_aln0_tf|boolean that returns TRUE if `ovlp_perc_aln0` <= `qmaxoverlap` in the overlapping case; if separated, this automatically returns TRUE|
+|ovlp_perc_aln1|the % of overlapping alignment block with respect to `aln1`; if negative, the alignments are separated|
+|ovlp_perc_aln1_tf|boolean that returns TRUE if `ovlp_perc_aln1` <= `qmaxoverlap` in the overlapping case; if separated, this automatically returns TRUE|
 |aln0_bp|the inferred breakpoint position of gene0|
 |aln0_bp_win_tf|boolean if the gene0 breakpoint is within the breakpoint window per `-bpw, --bpwin` argument|
 |aln1_bp|the inferred breakpoint position of gene1|
