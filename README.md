@@ -158,7 +158,8 @@ There must be at least this number of supporting reads to call a fusion.
 
 Including this flag will additionally output a data frame with ALL reads (regardless if they pass filtering criteria) and columns for calculated metrics of filters described above along with whether each read passes criteria, represented by TRUE (pass) or FALSE (failed) values.
 The report will print to `stdout` if the `-o, --outpath` is not supplied.
-If `-o, --outpath` is supplied, the dataframe will output to a tab-delimited, file in the specified directory ending in `_fusilli_read_summary.txt`
+The `-o, --outpath` MUST be supplied.
+The dataframe will output to a tab-delimited, file in the specified directory ending in `_fusilli_read_summary.txt`
 See below for more details.
 
 ## FUSILLI Tutorial
@@ -355,6 +356,52 @@ Let's do that in conjunction with `-o ./` to output results to `.txt.` files (in
 ```
 python ??.py -p ??.paf -mnc 1 -nf -nfm -r -o ./
 ```
+
+FUSILLI will output:
+
+* `??_fusilli.txt` which shows the fusions and read counts in tab-delimited file.
+* `??_fusilli_read_summary.txt` which is a data frame of all reads and filtering criteria was passed.
+
+Let's look at `??_fusilli_read_summary.txt`:
+
+
+
+gene0 | gene1 | chr0 | chr1 | fusion | read_query | read_length | aln_dist_rd | aln_dist_rd_tf | target_dist | target_dist_tf | ovlp_perc_aln0 | ovlp_perc_aln0_tf | ovlp_perc_aln1 | ovlp_perc_aln1_tf | aln0_bp | aln0_bp_win_tf | aln1_bp | aln1_bp_win_tf | in_fus_mast_tf | overall_filt_tf | ct | ct_tf | overall_tf
+------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ------ | ---
+AUTS2 | PAX5 | 6 | 8 | ('AUTS2', 'PAX5') | a59b3c61-8989-4712-a4d5-7e71f5d2d3c4 | 2191 | -353 | FALSE |  | TRUE | -56.38977636 | TRUE | -60.34188034 | TRUE | 70741704 | TRUE | 37036630 | TRUE | TRUE | FALSE | 1 | FALSE | FALSE
+
+Each column is explained below:
+
+|column_name|definition|
+|------ | ------ |
+|gene0|partner gene corresponding to the first alignment (`aln0`) processed on the read|
+|gene1|partner gene corresponding to the second alignment (`aln1`) processed on the read|
+|chr0|chromosome number of gene0|
+|chr1|chromosome number of gene1|
+|fusion|the alphabetically-standardized fusion name|
+|read_query|the read id in the PAF file|
+|read_length|the read length in bp|
+|aln_dist_rd|the distance in bp between alignments on a read corresponding to `-mxg, --maxgap` and `-mxo, --maxoverlap` filters; positive numbers represent overlap and negative numbers represent separation|
+|aln_dist_rd_tf|boolean if is passes (TRUE) or fails  (FALSE) the `-mxg, --maxgap` and `-mxo, --maxoverlap` filters; if alignments overlap, the aln_dist_rd distance is converted to a positive number and must be <= `--maxoverlap` to pass|
+|target_dist|if gene targets on the same chromsome, the amount in bp they overlap; corresponds to the `-mxgo, --maxgapoverlap` filter; positive numbers represent overlap and negative numbers represent separation; if the gene targets are on separate chromsome, nothing is populated in this column|
+|target_dist_tf|boolean if is passes (TRUE) or fails  (FALSE) the `-mxgo, --maxgapoverlap` filter|??
+|ovlp_perc_aln0|chromsome number of gene1|??
+|ovlp_perc_aln0_tf|chromsome number of gene1|??
+|ovlp_perc_aln1|chromsome number of gene1|??
+|ovlp_perc_aln1_tf|chromsome number of gene1|??
+|aln0_bp|the inferred breakpoint position of gene0|
+|aln0_bp_win_tf|boolean if the gene0 breakpoint is within the breakpoint window per `-bpw, --bpwin` argument|
+|aln1_bp|the inferred breakpoint position of gene1|
+|aln1_bp_win_tf|boolean if the gene1 breakpoint is within the breakpoint window per `-bpw, --bpwin` argument|
+|in_fus_mast_tf|boolean if the detected fusion resides in the fusion master per ``;TRUE if it exists and FALSE if it does not; defaults to TRUE if no fusion master is provided|
+|overall_filt_tf|boolean if it passed all read calculated filters (`aln_dist_rd_tf`, `target_dist_tf`, `ovlp_perc_aln0_tf`, `ovlp_perc_aln1_tf`, `aln0_bp_win_tf`, `aln1_bp_win_tf`)|
+|ct|the number of passing supporting reads ie those reads with `overall_filt_tf` == TRUE|
+|ct_tf|boolean; TRUE if the number of passing supporting reads >= `-mnc, --mincount`|
+|overall_tf|boolean; TRUE if the read is TRUE for `overall_filt_tf`, `in_fus_mast_tf`, and, `ct_tf` |
+
+
+
+
 
 
 
