@@ -21,14 +21,29 @@ See below for more details.
 
 ## Requirements
 
-
+* [anaconda](https://docs.anaconda.com/anaconda/install/) to create conda environments
+* [python](https://www.python.org/) (FUSILLI known to work with version `3.12.9 `)
 
 ## Installation
 
-The tool can be run by simply downloading/cloning this repository.
+1. The tool can be run by first downloading/cloning this repository.
 
 ```
 git clone git@github.com:jwanglab/fusilli.git
+```
+
+Change directory so that you are now in the cloned github repo.
+
+```
+cd <path_to_fusilli_github_repo>
+```
+
+2. Next, create and activate a conda environment and install the required dependencies as shown below:
+
+```
+conda create -n fusilli
+conda activate fusilli
+pip install -r requirements.txt
 ```
 
 ## Quick Start
