@@ -23,7 +23,7 @@ See below for more details.
 
 
 
-## Installaion
+## Installation
 
 The tool can be run by simply downloading/cloning this repository.
 
@@ -49,7 +49,7 @@ PAF files can be generated from long-read sequencing using [minimap2](https://gi
 FUSILLI assumes a **genomic** reference is used for alignment.
 FUSILLI looks for alignments from the PAF file overlapping with target genes of interested in a B-ALL BED file (by default).
 After assembling candidate reads mapping to disparate genes, FUSILLI applies filters to get rid of false positives, most likely due to ambiguous alignments.
-By default, FUSILLI will output fusions with the number of unique supporting reads to `stdout`:
+FUSILLI will output fusions with the number of unique supporting reads to `stdout` (but also as the option to additionally output to a file):
 
 ```
 analyzing the PAF file at /home/jclin/sample.paf: 100%|████████████████████████████████████████████████████████████████████| 6515299/6515299 [01:09<00:00, 94064.51it/s]
@@ -156,9 +156,209 @@ There must be at least this number of supporting reads to call a fusion.
 
 11. `-r, --report`
 
-Including this flag will additionally output a data frame with all reads and columns for calculated metrics of filters described above along with whether each read passes criteria, represented by TRUE (pass) or FALSE (failed) values.
+Including this flag will additionally output a data frame with ALL reads (regardless if they pass filtering criteria) and columns for calculated metrics of filters described above along with whether each read passes criteria, represented by TRUE (pass) or FALSE (failed) values.
 The report will print to `stdout` if the `-o, --outpath` is not supplied.
 If `-o, --outpath` is supplied, the dataframe will output to a tab-delimited, file in the specified directory ending in `_fusilli_read_summary.txt`
 See below for more details.
+
+## FUSILLI Tutorial
+
+For this tutorial, let's look at sample with a known fusion, ETV6::RUNX1, determined through conventional clinical testing.
+ETV6::RUNX1 results from a balanced translocation between chromosomes 12 and 21 (t(12;21)(p13;q22)).
+
+The sample PAF we will be using is located at `??`.
+
+After installing FUSILLI, change your directory to the cloned github repository and run the below:
+
+```
+python fusilli.py -p ??.paf
+```
+
+FUSILLI will start processing the PAF file and show a progress bar as the PAF file is analyzed.
+After processing, FUSILLI outputs the below:
+
+**Sample Output**
+
+```
+analyzing the PAF file at ??.paf...: 100%|████████████████████████████████████████████████████████████████████| 6515299/6515299 [01:09<00:00, 94064.51it/s]
+
+---------------------------
+ FUSILLI Fusion Detection
+---------------------------
+('ETV6', 'RUNX1') 16.0
+
+finished!
+```
+
+### Changing default parameters
+
+Now, let's look at a file where the BCR::ABL1 fusion could not be detected in a sample confirmed to have this fusion...
+
+If we run the below in terminal:
+
+```
+python fusilli.py -p ??.paf
+```
+
+we get:
+
+```
+analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 114043.29it/s]
+
+---------------------------
+ FUSILLI Fusion Detection
+---------------------------
+No fusions detected!
+
+finished!
+```
+
+No fusions were detected.
+This could be due to a number of reasons.
+FUSILLI performs well with samples sequenced at high depth on the order of 10M reads/sample.
+Since it requires a minimum of 2 fusion-supporting reads to call a fusion, let's change that parameter.
+Perhaps there is only 1 supporting read.
+Let's change the number of threshold of minimum supporting reads from 2 to 1.
+
+```
+python fusilli.py -p ??.paf -mnc 1
+```
+
+Running the above outputs the below (note the order genes are listed in the fusion gene pair is alphabetized for standard naming convention):
+
+```
+analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:18<00:00, 109167.49it/s]
+
+---------------------------
+ FUSILLI Fusion Detection
+---------------------------
+('PAX5', 'ZCCHC7') 1.0
+('ABL1', 'BCR') 1.0
+
+finished!
+```
+
+As you can see, this sample does have 1 supporting read for BCR::ABL1.
+More sequencing depth may be needed to confirm this result.
+
+Is there another way to make the caller more permissive?
+Or perhaps you want to know how to get some assistance on the caller without this documentation...run the below!
+
+```
+python /proj/jwanglab/users/jclin/nanopore-dx/10_fusion_detection/fusilli/src/fusilli/fusilli.py --help
+```
+
+The help text will show a description of the tool along with descriptions of each argument.
+As shown, the `-nf` option will ignore filters.
+Let's try it out in combination with `-mnc 1` using the same sample as before!
+
+```
+python ??.py -p ??.paf -mnc 1 -nf
+```
+
+we get (note fusions are sorted by descending counts):
+
+```
+analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 109537.93it/s]
+
+---------------------------
+ FUSILLI Fusion Detection
+---------------------------
+('CRLF2', 'P2RY8') 20
+('PAX5', 'ZCCHC7') 14
+('BCL2', 'IGH') 2
+('ABL1', 'BCR') 1
+('ETV6', 'PDGFRB') 1
+('IGH', 'P2RY8') 1
+
+finished!
+```
+
+Additionally, we can ignore the fusion master with `-nfm`.
+This could be useful for discovering novel fusions.
+Doing so results in the below with even more results.
+
+```
+python ??.py -p ??.paf -mnc 1 -nf -nfm
+```
+
+```
+analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 112285.31it/s]
+
+---------------------------
+ FUSILLI Fusion Detection
+---------------------------
+('CSF1R', 'PDGFRB') 844
+('TCRB', 'TRB') 251
+('TCRA', 'TRA') 49
+('AFDN', 'MLLT4') 25
+('CRLF2', 'P2RY8') 20
+('DEK', 'TPMT') 18
+('PAX5', 'ZCCHC7') 14
+('NKX2-1', 'SFTA3') 5
+('STIL', 'TAL1') 3
+('CEBPA', 'CRLF2') 2
+('ELMO1', 'NPM1') 2
+('NPM1', 'TLX3') 2
+('BCL2', 'CEBPA') 2
+('BCL2', 'IGH') 2
+('CCND3', 'STAG2') 1
+('JAK2', 'TRB') 1
+('HOXA10', 'HOXA13') 1
+('HOXA11', 'HOXA13') 1
+('DEXI', 'ETV6') 1
+('AUTS2', 'MECOM') 1
+('CDK6', 'SSBP2') 1
+('BCL2', 'CRLF2') 1
+('IGH', 'P2RY8') 1
+('JAK2', 'TCRB') 1
+('MKL1', 'RANBP2') 1
+('MEF2D', 'SEPT6') 1
+('CCND3', 'MLLT6') 1
+('NPM1', 'UBTF') 1
+('FBRSL1', 'IGH') 1
+('HOTTIP', 'HOXA13') 1
+('FBRSL1', 'PRDM16') 1
+('HOXA10', 'HOXA11') 1
+('CSF1R', 'ETV6') 1
+('HOTTIP', 'HOXA11') 1
+('HOTTIP', 'HOXA10') 1
+('LINC00502', 'RPP30') 1
+('ETV6', 'TAF15') 1
+('ABL1', 'SSBP2') 1
+('BCL2', 'HAUS1') 1
+('AUTS2', 'IGH') 1
+('AUTS2', 'BCL2') 1
+('CEBPA', 'P2RY8') 1
+('NSD1', 'SET') 1
+('ABL1', 'BCR') 1
+('AUTS2', 'ZC3HAV1') 1
+('MBNL1', 'SSBP2') 1
+('SEPT6', 'SSBP2') 1
+('EPOR', 'ZNF521') 1
+('ETV6', 'PDGFRB') 1
+('BCL11B', 'RUNX1T1') 1
+('CRLF2', 'ZNF521') 1
+('AFF1', 'ATF7IP') 1
+('CRLF2', 'FBRSL1') 1
+
+finished!
+```
+
+Above shows many possible fusions, most of which are likely a result of ambiguous alignments.
+Since no filters were applied, the most permissive case was applied and FUSILLI output all possible fusions from the default BED file.
+Let's say you want to look at what specific criteria was met for reads spanning the fusions above.
+As mentioned previously, you can include the `-r` option to output a report.
+Let's do that in conjunction with `-o ./` to output results to `.txt.` files (in the `./` current directory) that we can look at more closely.
+
+
+```
+python ??.py -p ??.paf -mnc 1 -nf -nfm -r -o ./
+```
+
+
+
+
+
 
 
