@@ -1,17 +1,10 @@
 from collections import defaultdict
 import argparse
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")
-from matplotlib import pyplot as plt
-import collections
-import pickle
 import paf
 import ga_calc
-import gene
 import sys
 from tqdm import tqdm
-import time
 import pandas as pd
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -73,9 +66,6 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                                 # hits is a default dict of form hits = [(a.q, [alignments])] where a.q is the key ie query sequence hash followed by list of alignments
                                 hits[a.q] = [a]
                 pbar.update(1)
-    # fusions is a default dict of form fusions = [(a, b)] where a and b are the gene names of the fusion
-    # fusions = defaultdict(int)
-    fr_lookup = defaultdict(list)
 
     rs = []
     rls = []
@@ -100,80 +90,31 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     # fo = []
     for read in hits: 
         # a single query ie read can have multiple alignments or mappings in the genome
-        # hits are reads where they fall within a target chromosome
+        # qe is query end and qs is query start with respect to the read! so a read starts at 0 ... length(read)
         for i in range(len(hits[read])): # len of hits[read] is the number of alignments associated with given query seq hash/read
             a0 = hits[read][i] # a0 is the ith or first alignment...this is basically a line from the PAF file
             c0 = chr_idx[a0.t] # a0.t is the corresponding target sequence name ie chromosome, so c0 is the index of the chr...chr1 --> 0, chr2 --> 1 etc
             for j in range(i+1, len(hits[read])): # for the NEXT (ie i+1) read associated with the given query....also get the alignment and chr index
                 a1 = hits[read][j]
                 c1 = chr_idx[a1.t]
-                # get the length of the overlap between the two alignments....are they greater than 100? if yes, then they overlap
-                # qe is query end and qs is query start with respect to the read! so a read starts at 0 ... length(read)
-                
-                '''
-                # filter - appropriate gap in the alignment records
-                if filt:
-                    if ga_calc.a_dist_tf(a0, a1, max_overlap, max_gap) == False:
-                        continue
-                # filter - genes must not overlap too much
-                if filt:
-                    if c0 == c1 and (ga_calc.t_dist(a0, a1) > max_gene_overlap):
-                        continue
-                # filter - overlapping portion must not be more than 40% of query lengths
-                if filt:
-                    if (ga_calc.q_overlap(a1, a0) > qmax_overlap) or (ga_calc.q_overlap(a0, a1) > qmax_overlap):
-                        continue
-                '''
-                
-                # these are generic identifiers of the genes involved based on chr and halfway point location
-                # g0 = (c0, (a0.ts+(a0.te-a0.ts)//2)//1000000) # (chrom, loc[Mbp]) this is a tuple...representing the chrom and halfway point of each alignment??
-                # g1 = (c1, (a1.ts+(a1.te-a1.ts)//2)//1000000) 
                 g0 = None
                 g1 = None
-                # the actual gene names are assigned further down below
-
-                # assign gene names instead of coordinates to those matching one of our known targets
-                
-                # check if there is more than one gene for each alignment...??
+                # check if there is more than one gene for each alignment...
                 g0l = []
                 g1l = []
-                
                 for g in genes:
                     # if the chr is the same...and the overlap between the gene and target sequence is greater than min_anchor...assign g0 to given g ie of class string
-                    
-
-                        
                     if genes[g][0] == c0 and ga_calc.ga_ovlp(genes[g][1], genes[g][2], a0) > min_anchor: ## ?? this may not necessarily cover the breakpoint...ex if aln is entirely within gene
                         g0l.append(g)
                         # g0 = g
                         g0_c = genes[g][0]
                         g0_s = genes[g][1]
                         g0_e = genes[g][2]
-                        cg0 = gene.CandGene(g0, g0_c, g0_s, g0_e)
                     if genes[g][0] == c1 and ga_calc.ga_ovlp(genes[g][1], genes[g][2], a1) > min_anchor:
                         g1l.append(g)
-                        # g1 = g
                         g1_c = genes[g][0]
                         g1_s = genes[g][1]
                         g1_e = genes[g][2]
-                        cg1 = gene.CandGene(g1, g1_c, g1_s, g1_e)
-                # print(g0, g1)
-                # if len(set(g0l)) > 1:
-                #     g0 = g0l
-                #     # print(g0l)
-                # if len(set(g1l)) > 1:
-                #     g1 = g1l
-                #     print(g1l)
-                
-                
-                '''
-                # breakpoint must be within 10 bp of gene start/end
-                if filt:
-                    if (ga_calc.det_bp(a0, a1) < (g0_s - bp_win)) | (ga_calc.det_bp(a0, a1) > (g0_e + bp_win)):
-                        continue
-                    if (ga_calc.det_bp(a1, a0) < (g1_s - bp_win)) | (ga_calc.det_bp(a1, a0) > (g1_e + bp_win)):
-                        continue
-                '''
                 # only consider genes on different alignments...an alignment can have multiple genes...but here we only consider gene pairs from different alignments ie g0 from a0 and g1 from a1
                 # ?? this is a limitation of the software...the only way to get metrics for multiple genes from the same target alignment is to rerun the mapping with a reference broken down by gene target starts and ends
                 for k in range(len(g0l)): 
@@ -187,26 +128,11 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                         r_val = (a0, a1)
                         # standardize the fusion name here
                         if (g0 < g1):
-                        #     # fus0.append(g0)
-                        #     # fus1.append(g1)
                             key = (g0, g1)
-
-                        #     # g_val = [cg0, cg1]
-                            r_val = (a0, a1)
                         else:
-                        #     # fus0.append(g1)
-                        #     # fus1.append(g0)
                             key = (g1, g0)
-                        #     # g_val = [cg1, cg0]
-                            r_val = (a1, a0)
-                        # if the read has already been used in a supporting alignment pair, skip, since we are counting only the number of supporting reads
-                        # if (len(fr_lookup[key])!= 0):
-                        #     if r_val[0].q == fr_lookup[key][0][0].q:
-                        #         continue
-                        # fg_lookup[key] =  g_val
-                        fr_lookup[key].append(r_val)
-                        # win_lookup[key] = defaultdict(list)
-                        # fusions[key] += 1
+
+                        # calculate the metrics for the reads
                         fus.append(key)
                         gene0l.append(g0)
                         gene1l.append(g1)
@@ -224,13 +150,13 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                         f5.append(ga_calc.det_bp(a0, a1))
                         f6.append(ga_calc.det_bp(a1, a0))
 
+                        # booleans for if the metrics pass the filters
                         b1 = ga_calc.a_dist_tf(a0, a1, max_overlap, max_gap)
                         b2 = ga_calc.t_dist_tf(a0, a1, max_gene_overlap)
                         b3 = ga_calc.q_overlap_tf(a0, a1, qmax_overlap)
                         b4 = ga_calc.q_overlap_tf(a1, a0, qmax_overlap)
                         b5 = ga_calc.bp_tf(a0, a1, g0_s, g0_e, bp_win)
                         b6 = ga_calc.bp_tf(a1, a0, g1_s, g1_e, bp_win)
-
                         if nfusm:
                             if ((key[0] + "::" + key[1] in fm_list) or (key[1] + "::" + key[0] in fm_list)):
                                 b7 = True
@@ -246,12 +172,6 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                         f5b.append(b5)
                         f6b.append(b6)
                         f7b.append(b7)
-                        # f7b.append(b7)
-                        # fo.append(bo)
-
-
-    # fusions = sorted([(f,fusions[f]) for f in fusions], key=lambda a:a[1])
-    # fusions_filt = {}
 
     results = pd.DataFrame({
               'gene0': gene0l,
@@ -287,8 +207,6 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     results['ct'] = results['fusion'].map(ct_lkup.set_index('fusion')['ct'])
     results['ct_tf'] = results['ct'].apply(lambda x: x >= min_ct)
     results['overall_tf'] = np.where((results['overall_filt_tf'] == True) & (results['in_fus_mast_tf'] == True) & (results['ct_tf'] == True), True, False)
-    # results['overall_tf'] = results['overall_filt_tf'] == results['in_fus_mast_tf'] == results['ct_tf'] == True
-
 
     if outpath != '':
         orig_stdout = sys.stdout
@@ -316,59 +234,11 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     else:
         print("No fusions detected!")
     if rep:
-        print("---------------------------")
-        print(" FUSILLI Fusion Read Summary")
-        print("---------------------------")
-        print(results)
+        raise("ERROR: The report option was enabled but no -o argument was provided for the output path! Please provide an output path when using -r.")
     print()
     print("finished!")
 
-    # print(results)
 
-    # for k, ct in fusions:
-    #     if ct >= min_ct:
-    #         if nfusm:
-    #             if ((k[0] + "::" + k[1] in fm_list) or (k[1] + "::" + k[0] in fm_list)):
-    #                 fusions_filt[k] = ct
-    #         else:
-    #             fusions_filt[k] = ct
-    # for index, row in results.iterrows():
-    #     if row.fo == True:
-    #         print(row)
-    
-
-
-    
-
-
-    # if outpath != '':
-    #     orig_stdout = sys.stdout
-    #     fo = open(outpath, 'w')
-    #     sys.stdout = fo
-    #     print()
-    #     print("---------------------------")
-    #     print(" Fusion detection")
-    #     print("---------------------------")
-    #     if len(fusions_filt) > 0:
-    #         for f,ct in fusions_filt.items():
-    #             print(str(f), ct)
-    #     else:
-    #         print("No fusions detected!")
-    #     sys.stdout = orig_stdout
-    #     fo.close()
-    # else:
-    #     print()
-    #     print("---------------------------")
-    #     print(" Fusion detection")
-    #     print("---------------------------")
-    #     if len(fusions_filt) > 0:
-    #         for f,ct in fusions_filt.items():
-    #             print(f, ct)
-    #     else:
-    #         print("No fusions detected!")
-    
-    # print()
-    # print("finished!")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("B-ALL fusion caller based on ONT RNA-seq", formatter_class=argparse.ArgumentDefaultsHelpFormatter)

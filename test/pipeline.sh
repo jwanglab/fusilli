@@ -74,7 +74,7 @@ do
     while IFS=$'\t' read -r -a array; do
         seq_id=${array[$seq_id_col]}
         echo "fusilli processing $seq_id..."
-       id=$(sbatch -n1 -N1 -c1 --mem=16G --time=11-0 --job-name=01_fusilli_${seq_id} --out=${log_path}/01_fusilli_${seq_id}.log --wrap="python3 /proj/jwanglab/users/jclin/nanopore-dx/10_fusion_detection/fusilli/src/fusilli/fusilli.py -p ${input_path}/${seq_id}.paf -o ${fd_output_path}")
+       id=$(sbatch -n1 -N1 -c1 --mem=16G --time=11-0 --job-name=01_fusilli_${seq_id} --out=${log_path}/01_fusilli_${seq_id}.log --wrap="python3 /proj/jwanglab/users/jclin/nanopore-dx/10_fusion_detection/fusilli/src/fusilli/fusilli.py -p ${input_path}/${seq_id}.paf -o ${fd_output_path} -r -nfm")
         id=${id##* }
         deps="$deps:$id"
     done
