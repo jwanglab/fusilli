@@ -38,6 +38,9 @@ def read_fmaster(fusion_master_file):
 
 def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_overlap, max_gene_overlap, bp_win, qmax_overlap, filt, min_ct, rep):
     
+    if rep and outpath == '':
+        raise("ERROR: The report option was enabled but no -o argument was provided for the output path! Please provide an output path when using -r.")
+
     genes = read_bed(bed_file)
     fm_list = read_fmaster(fm_file)
     hits = defaultdict(list)
@@ -233,8 +236,6 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
             print(row.fusion, row.ct)
     else:
         print("No fusions detected!")
-    if rep:
-        raise("ERROR: The report option was enabled but no -o argument was provided for the output path! Please provide an output path when using -r.")
     print()
     print("finished!")
 
@@ -244,8 +245,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("B-ALL fusion caller based on ONT RNA-seq", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-p", "--paf", help="PAF of reads to hg38 (mm2 -x map-ont)")
 
-    parser.add_argument("-b", "--bed", help="BED file including target genes, default is BED file specific for B-ALL", default='/proj/jwanglab/users/jclin/nanopore-dx/10_fusion_detection/fusilli/data/peds_leuk_genes.240422.bed')
-    parser.add_argument("-fm", "--fusionmaster", help="tab-delimited file with fusion genes of interest, default is file for B-ALL fusions", default='/proj/jwanglab/users/jclin/nanopore-dx/10_fusion_detection/fusilli/data/ball_fusion_master.txt')
+    parser.add_argument("-b", "--bed", help="BED file including target genes, default is BED file specific for B-ALL", default='./data/peds_leuk_genes.240422.bed')
+    parser.add_argument("-fm", "--fusionmaster", help="tab-delimited file with fusion genes of interest, default is file for B-ALL fusions", default='./data/ball_fusion_master.txt')
     parser.add_argument("-nfm", "--no_fusion_master", action='store_false', help="if included argument, any gene pairs from the bed file are considered")
     parser.add_argument("-o", "--outpath", help="if included argument, output path for fusion detection output", default='')
     parser.add_argument("-a", "--anchor", type=int, help="minimum anchor size ie overlap between read and target gene", default=50)
