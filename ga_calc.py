@@ -66,26 +66,43 @@ def det_bp(aln0, aln1):
 # function to return boolean of distance between alignments on query
 def a_dist_tf(aln0, aln1, max_overlap, max_gap):
     # raw distance is negative if the alignments are separated, that's why we multiply by -1
-    if (a_dist(aln0, aln1) > max_overlap) or ((a_dist(aln0, aln1) * -1) > max_gap):
-        return False
+    # overlapping
+    if a_dist(aln0, aln1) >= 0:
+        if (a_dist(aln0, aln1) > max_overlap):
+            return False
+        else:
+            return True
+    # separated alignments
     else:
-        return True
+        # convert to a positive number
+        if ((a_dist(aln0, aln1) * -1) > max_gap):
+            return False
+        else:
+            return True
 
 # function to return boolean of overlapping alignments on target if on same chr
 def t_dist_tf(aln0, aln1, max_gene_overlap):
     if aln0.t == aln1.t:
-        if t_dist(aln0, aln1) > max_gene_overlap:
-            return False
+        # overlapping
+        if t_dist(aln0, aln1) >= 0:
+            if t_dist(aln0, aln1) > max_gene_overlap:
+                return False
+            else:
+                return True
+        # separated
         else:
-             return True
-    else:
-        return True
+            return True
 
 # function to return boolean of overlapping portion % with respect to alignment
 # order matters, returns percentage with respect to aln1
 def q_overlap_tf(aln0, aln1, qmax_overlap):
-    if q_overlap(aln0, aln1) > qmax_overlap:
-        return False
+    # overlapping
+    if q_overlap(aln0, aln1) >= 0:
+        if q_overlap(aln0, aln1) > qmax_overlap:
+            return False
+        else:
+            return True
+    # separated
     else:
         return True
 
