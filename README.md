@@ -189,12 +189,12 @@ See below for more details.
 For this tutorial, let's look at sample with a known fusion, ETV6::RUNX1, determined through conventional clinical testing.
 ETV6::RUNX1 results from a balanced translocation between chromosomes 12 and 21 (t(12;21)(p13;q22)).
 
-The sample PAF we will be using is located at `??`.
+The sample PAF we will be using is located at `./sample_data/ETV6_RUNX1.paf` within this repo.
 
 After installing FUSILLI, change your directory to the cloned github repository and run the below:
 
 ```
-python fusilli.py -p ??.paf
+python fusilli.py -p ./sample_data/ETV6_RUNX1.paf
 ```
 
 FUSILLI will start processing the PAF file and show a progress bar as the PAF file is analyzed.
@@ -203,7 +203,7 @@ After processing, FUSILLI outputs the below:
 **Sample Output**
 
 ```
-analyzing the PAF file at ??.paf...: 100%|████████████████████████████████████████████████████████████████████| 6515299/6515299 [01:09<00:00, 94064.51it/s]
+analyzing the PAF file at ./sample_data/ETV6_RUNX1.paf...: 100%|████████████████████████████████████████████████████████████████████| 6515299/6515299 [01:09<00:00, 94064.51it/s]
 
 ---------------------------
  FUSILLI Fusion Detection
@@ -220,13 +220,13 @@ Now, let's look at a file where the BCR::ABL1 fusion could not be detected in a 
 If we run the below in terminal:
 
 ```
-python fusilli.py -p ??.paf
+python fusilli.py -p ./sample_data/BCR_ABL1.paf
 ```
 
 we get:
 
 ```
-analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 114043.29it/s]
+analyzing the PAF file at ./sample_data/BCR_ABL1.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 114043.29it/s]
 
 ---------------------------
  FUSILLI Fusion Detection
@@ -244,13 +244,13 @@ Perhaps there is only 1 supporting read.
 Let's change the number of threshold of minimum supporting reads from 2 to 1.
 
 ```
-python fusilli.py -p ??.paf -mnc 1
+python fusilli.py -p ./sample_data/BCR_ABL1.paf -mnc 1
 ```
 
 Running the above outputs the below (note the order genes are listed in the fusion gene pair is alphabetized for standard naming convention):
 
 ```
-analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:18<00:00, 109167.49it/s]
+analyzing the PAF file at ./sample_data/BCR_ABL1.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:18<00:00, 109167.49it/s]
 
 ---------------------------
  FUSILLI Fusion Detection
@@ -276,13 +276,13 @@ As shown, the `-nf` option will ignore filters.
 Let's try it out in combination with `-mnc 1` using the same sample as before!
 
 ```
-python ??.py -p ??.paf -mnc 1 -nf
+python fusilli.py -p ./sample_data/BCR_ABL1.paf -mnc 1 -nf
 ```
 
 we get (note fusions are sorted by descending counts):
 
 ```
-analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 109537.93it/s]
+analyzing the PAF file at ./sample_data/BCR_ABL1.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 109537.93it/s]
 
 ---------------------------
  FUSILLI Fusion Detection
@@ -302,11 +302,11 @@ This could be useful for discovering novel fusions.
 Doing so results in the below with even more results.
 
 ```
-python ??.py -p ??.paf -mnc 1 -nf -nfm
+python fusilli.py -p ./sample_data/BCR_ABL1.paf -mnc 1 -nf -nfm
 ```
 
 ```
-analyzing the PAF file at ??.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 112285.31it/s]
+analyzing the PAF file at ./sample_data/BCR_ABL1.paf...: 100%|███████████████████████████████████████████████████████████████████| 1966884/1966884 [00:17<00:00, 112285.31it/s]
 
 ---------------------------
  FUSILLI Fusion Detection
@@ -376,15 +376,15 @@ Let's do that in conjunction with `-o ./` to output results to `.txt.` files (in
 
 
 ```
-python ??.py -p ??.paf -mnc 1 -nf -nfm -r -o ./
+python fusilli.py -p ./sample_data/BCR_ABL1.paf -mnc 1 -nf -nfm -r -o ./
 ```
 
 FUSILLI will output:
 
-* `??_fusilli.txt` which shows the fusions and read counts in tab-delimited file.
-* `??_fusilli_read_summary.txt` which is a data frame of all reads and filtering criteria was passed.
+* `xx_fusilli.txt` which shows the fusions and read counts in tab-delimited file, where `xx` is the sample name.
+* `xx_fusilli_read_summary.txt` which is a data frame of all reads and filtering criteria was passed.
 
-Let's look at `??_fusilli_read_summary.txt`:
+Let's look at a samle line from an example `xx_fusilli_read_summary.txt`:
 
 
 
