@@ -92,6 +92,9 @@ def t_dist_tf(aln0, aln1, max_gene_overlap):
         # separated
         else:
             return True
+    # separate chromosomes
+    else:
+        return True
 
 # function to return boolean of overlapping portion % with respect to alignment
 # order matters, returns percentage with respect to aln1
