@@ -43,12 +43,19 @@ cd <path_to_fusilli_github_repo>
 ```
 conda create -n fusilli
 conda activate fusilli
+conda install pip
 pip install -r requirements.txt
 ```
 
 ## Quick Start
 
-On a command line, at minimum, you would run:
+After following the installlation steps above and activating the fusilli conda environment...
+
+```
+conda activate fusilli
+```
+
+...on a command line, at minimum, you would run:
 
 ```
 python fusilli.py -p <path_to_paf_file>
@@ -60,7 +67,7 @@ This is the path to a PAF (pairwise mapping format), tab-delimited file generate
 See [here](https://github.com/lh3/miniasm/blob/master/PAF.md) for more details.
 The PAF file name must end in the `.paf` extension.
 FUSILLI output assumes the PAF file name is equivalent to the sample/sequencing id.
-PAF files can be generated from long-read sequencing using [minimap2](https://github.com/lh3/minimap2).
+PAF files can be generated from long-read sequencing using [minimap2](https://github.com/lh3/minimap2) (using a reference **genome**...`minimap2 -cx splice ${ref_genome_path} ${sample_fastq} > ${sample_paf}`).
 FUSILLI assumes a **genomic** reference is used for alignment.
 FUSILLI looks for alignments from the PAF file overlapping with target genes of interested in a B-ALL BED file (by default).
 After assembling candidate reads mapping to disparate genes, FUSILLI applies filters to get rid of false positives, most likely due to ambiguous alignments.
