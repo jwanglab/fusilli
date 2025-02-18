@@ -1,6 +1,6 @@
 # FUSILLI
 
-![fusilli_logo](./assets/images/img1.png)
+![fusilli_logo](./assets/images/img0.png)
 
 FUSILLI (**FUS**ions **I**n **L**eukemia for **L**ong-read sequencing **I**nvestigator) is a fusion caller specific for B-ALL genomic fusion subtypes based on long-read, transcriptomic sequencing.
 
@@ -144,31 +144,31 @@ where the first two columns represent partner genes and the third column is the 
 
 FUSILLI first looks for reads that overlap with a target gene by at least `-a` specified bp.
 
-![img2](./assets/images/img2.png)
+![img2](./assets/images/img1.png)
 
 5. `-mxg, --maxgap: default=30` and `-mxo, --maxoverlap: default=50`
 
  `-mxg` and `-mxo` define the maximum gap and maximum overlap (bp) between alignments on a given read, respectively.
 
-![img3](./assets/images/img3.png)
+![img3](./assets/images/img2.png)
 
 6. `-mxgo, --maxgapoverlap: default=10`
 
 If target genes are on the same chromosome, they must not overlap by this amount (bp).
 
-![img4](./assets/images/img4.png)
+![img4](./assets/images/img3.png)
 
 7. `-bpw, --bpwin`
 
 Inferred breakpoints must be within the gene boundaries with buffer window of +/- `-bpw` bp.
 
-![img5](./assets/images/img5.png)
+![img5](./assets/images/img4.png)
 
 8. `-qmo, --qmaxoverlap: default=40`
 
 If the targets overlap, the alignments must not overlap more than this percentage with respect to both alignments.
 
-![img6](./assets/images/img6.png)
+![img6](./assets/images/img5.png)
 
 9. `-nf, --no_filt`
 
