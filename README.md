@@ -7,22 +7,22 @@ FUSILLI (**FUS**ions **I**n **L**eukemia for **L**ong-read sequencing **I**nvest
 ## Overview
 
 B-cell acute lymphoblastic (B-ALL) genomic subtypes are important prognostic measures informing downstream treatment regimens.
-They are conventionally diagnosed clinical testing including immunhistochemistry assays, FISH, and cytogenetics .
-NGS methods, specificaly long-read sequencing, may offer an alternative to these tests and/or provide additional insights regarding structural variations within B-ALL genomic subtypes.
+They are conventionally diagnosed through clinical testing including immunhistochemistry assays, FISH, and cytogenetics.
+NGS methods, specifically long-read sequencing, may offer an alternative to these tests and/or provide additional insights regarding structural variations within B-ALL genomic subtypes.
 Here, we present FUSILLI, a tool designed to look for fusions in long-read, transcriptomic sequencing.
 We have tested the data specifically on Oxford Nanopore Technologies' long-read sequencing platforms (primarily on the MinION and GridION).
 In brief, FUSILLI directly looks for candidate fusions by finding reads which align to disparate genes of interest.
 Then, FUSILLI filters those fusions using a variety of different criteria (see below).
 At minimum, FUSILLI requires a PAF file as input.
 By default, only relevant B-ALL gene fusions are reported along with the number of supporting reads.
-However, filters can be removed to create a more permissive output, even outside the context of B-ALL.
+However, filters can be removed to create a more permissive output, even outside the context of B-ALL (for purposes of other disease contexts and/or discovery of novel fusions).
 See below for more details.
 
 
 ## Requirements
 
 * [anaconda](https://docs.anaconda.com/anaconda/install/) to create conda environments
-* [python](https://www.python.org/) (FUSILLI known to work with version `3.12.9 `)
+* [python](https://www.python.org/) (FUSILLI known to work with version `3.12.9`)
 
 ## Installation
 
@@ -69,9 +69,11 @@ The PAF file name must end in the `.paf` extension.
 FUSILLI output assumes the PAF file name is equivalent to the sample/sequencing id.
 PAF files can be generated from long-read sequencing using [minimap2](https://github.com/lh3/minimap2) (using a reference **genome**...`minimap2 -cx splice ${ref_genome_path} ${sample_fastq} > ${sample_paf}`).
 FUSILLI assumes a **genomic** reference is used for alignment.
-FUSILLI looks for alignments from the PAF file overlapping with target genes of interested in a B-ALL BED file (by default).
+FUSILLI looks for alignments from the PAF file overlapping with target genes of interest in a B-ALL BED file (by default).
 After assembling candidate reads mapping to disparate genes, FUSILLI applies filters to get rid of false positives, most likely due to ambiguous alignments.
-FUSILLI will output fusions with the number of unique supporting reads to `stdout` (but also as the option to additionally output to a file):
+FUSILLI will output fusions with the number of unique supporting reads to `stdout` (but also has the option to additionally output to a file).
+
+Sample Output:
 
 ```
 analyzing the PAF file at /home/jclin/sample.paf: 100%|████████████████████████████████████████████████████████████████████| 6515299/6515299 [01:09<00:00, 94064.51it/s]
@@ -84,7 +86,7 @@ analyzing the PAF file at /home/jclin/sample.paf: 100%|████████�
 finished!
 ```
 
-For both PAF and BED files (described below), chromsome names should correspond to RefSeq format ie NC_000001.11, NC_000002.12, NC_000003.12...etc.
+For both PAF and BED files (described below), chromosome names should correspond to RefSeq format ie NC_000001.11, NC_000002.12, NC_000003.12...etc.
 
 
 
@@ -178,9 +180,8 @@ There must be at least this number of supporting reads to call a fusion.
 
 11. `-r, --report`
 
-Including this flag will additionally output a data frame with ALL reads (regardless if they pass filtering criteria) and columns for calculated metrics of filters described above along with whether each read passes criteria, represented by TRUE (pass) or FALSE (failed) values.
-The report will print to `stdout` if the `-o, --outpath` is not supplied.
-The `-o, --outpath` MUST be supplied.
+Including this flag will additionally output a data frame with **all** reads (regardless if they pass filtering criteria) and columns for calculated metrics of filters described above along with whether each read passes criteria, represented by TRUE (pass) or FALSE (failed) values.
+The `-o, --outpath` MUST be supplied to access the report.
 The dataframe will output to a tab-delimited, file in the specified directory ending in `_fusilli_read_summary.txt`
 See below for more details.
 
@@ -241,7 +242,7 @@ This could be due to a number of reasons.
 FUSILLI performs well with samples sequenced at high depth on the order of 10M reads/sample.
 Since it requires a minimum of 2 fusion-supporting reads to call a fusion, let's change that parameter.
 Perhaps there is only 1 supporting read.
-Let's change the number of threshold of minimum supporting reads from 2 to 1.
+Let's change the number of minimum supporting reads from 2 to 1.
 
 ```
 python fusilli.py -p ./sample_data/BCR_ABL1.paf -mnc 1
@@ -268,7 +269,7 @@ Is there another way to make the caller more permissive?
 Or perhaps you want to know how to get some assistance on the caller without this documentation...run the below!
 
 ```
-python /proj/jwanglab/users/jclin/nanopore-dx/10_fusion_detection/fusilli/src/fusilli/fusilli.py --help
+python fusilli.py --help
 ```
 
 The help text will show a description of the tool along with descriptions of each argument.
@@ -369,10 +370,11 @@ finished!
 ```
 
 Above shows many possible fusions, most of which are likely a result of ambiguous alignments.
-Since no filters were applied, the most permissive case was applied and FUSILLI output all possible fusions from the default BED file.
+Since no filters were applied, the most permissive case was applied and FUSILLI outputs all possible fusions from the default BED file.
+
 Let's say you want to look at what specific criteria was met for reads spanning the fusions above.
 As mentioned previously, you can include the `-r` option to output a report.
-Let's do that in conjunction with `-o ./` to output results to `.txt.` files (in the `./` current directory) that we can look at more closely.
+Let's do that in conjunction with `-o ./` to output results to `./` ie current directory.
 
 
 ```
@@ -381,10 +383,10 @@ python fusilli.py -p ./sample_data/BCR_ABL1.paf -mnc 1 -nf -nfm -r -o ./
 
 FUSILLI will output:
 
-* `xx_fusilli.txt` which shows the fusions and read counts in tab-delimited file, where `xx` is the sample name.
-* `xx_fusilli_read_summary.txt` which is a data frame of all reads and filtering criteria was passed.
+* `xx_fusilli.txt` which shows the fusions and read counts in a tab-delimited file, where `xx` is the sample name.
+* `xx_fusilli_read_summary.txt` which is a data frame of all reads and filtering criteria.
 
-Let's look at a samle line from an example `xx_fusilli_read_summary.txt`:
+Let's look at a sample line from `xx_fusilli_read_summary.txt`:
 
 
 
@@ -403,23 +405,23 @@ Each column is explained below:
 |fusion|the alphabetically-standardized fusion name|
 |read_query|the read id in the PAF file|
 |read_length|the read length in bp|
-|aln_dist_rd|the distance in bp between alignments on a read corresponding to `-mxg, --maxgap` and `-mxo, --maxoverlap` filters; positive numbers represent overlap and negative numbers represent separation|
-|aln_dist_rd_tf|boolean if is passes (TRUE) or fails  (FALSE) the `-mxg, --maxgap` and `-mxo, --maxoverlap` filters; if alignments overlap, the aln_dist_rd distance is converted to a positive number and must be <= `--maxoverlap` to pass|
-|target_dist|if gene targets on the same chromsome, the amount in bp they overlap; corresponds to the `-mxgo, --maxgapoverlap` filter; positive numbers represent overlap and negative numbers represent separation; if the gene targets are on separate chromsome, nothing is populated in this column|
-|target_dist_tf|boolean if is passes (TRUE) or fails  (FALSE) the `-mxgo, --maxgapoverlap` filter; if overlapping, `target_dist` must be <= `maxgapoverlap` to pass. if alignments are separated, this automatically returns TRUE|
-|ovlp_perc_aln0|the % of overlapping alignment block with respect to `aln0`; if negative, the alignments are separated|
-|ovlp_perc_aln0_tf|boolean that returns TRUE if `ovlp_perc_aln0` <= `qmaxoverlap` in the overlapping case; if separated, this automatically returns TRUE|
-|ovlp_perc_aln1|the % of overlapping alignment block with respect to `aln1`; if negative, the alignments are separated|
-|ovlp_perc_aln1_tf|boolean that returns TRUE if `ovlp_perc_aln1` <= `qmaxoverlap` in the overlapping case; if separated, this automatically returns TRUE|
-|aln0_bp|the inferred breakpoint position of gene0|
-|aln0_bp_win_tf|boolean if the gene0 breakpoint is within the breakpoint window per `-bpw, --bpwin` argument|
-|aln1_bp|the inferred breakpoint position of gene1|
-|aln1_bp_win_tf|boolean if the gene1 breakpoint is within the breakpoint window per `-bpw, --bpwin` argument|
-|in_fus_mast_tf|boolean if the detected fusion resides in the fusion master per ``;TRUE if it exists and FALSE if it does not; defaults to TRUE if no fusion master is provided|
-|overall_filt_tf|boolean if it passed all read calculated filters (`aln_dist_rd_tf`, `target_dist_tf`, `ovlp_perc_aln0_tf`, `ovlp_perc_aln1_tf`, `aln0_bp_win_tf`, `aln1_bp_win_tf`)|
-|ct|the number of passing supporting reads ie those reads with `overall_filt_tf` == TRUE|
-|ct_tf|boolean; TRUE if the number of passing supporting reads >= `-mnc, --mincount`|
-|overall_tf|boolean; TRUE if the read is TRUE for `overall_filt_tf`, `in_fus_mast_tf`, and, `ct_tf` |
+|aln_dist_rd|The distance in bp between alignments on a read corresponding to `-mxg, --maxgap` and `-mxo, --maxoverlap` filters. Positive numbers represent overlap and negative numbers represent separation.|
+|aln_dist_rd_tf|boolean if it passes (TRUE) or fails  (FALSE) the `-mxg, --maxgap` and `-mxo, --maxoverlap` filters. If alignments overlap, the aln_dist_rd distance is converted to a positive number (on the backend) and must be <= `--maxoverlap` to pass.|
+|target_dist|If gene targets are on the same chromsome, this is the amount in bp they overlap. This corresponds to the `-mxgo, --maxgapoverlap` filter. Positive numbers represent overlap and negative numbers represent separation. If the gene targets are on separate chromosomes, nothing is populated in this column.|
+|target_dist_tf|boolean if it passes (TRUE) or fails  (FALSE) the `-mxgo, --maxgapoverlap` filter. If overlapping, `target_dist` must be <= `maxgapoverlap` to pass. If alignments are separated, this automatically returns TRUE.|
+|ovlp_perc_aln0|The % of the overlapping alignment portion with respect to `aln0`. If negative, the alignments are separated.|
+|ovlp_perc_aln0_tf|boolean that returns TRUE if `ovlp_perc_aln0` <= `qmaxoverlap` in the overlapping case. If separated, this automatically returns TRUE.|
+|ovlp_perc_aln1|The % of the overlapping alignment portion with respect to `aln1`. If negative, the alignments are separated.|
+|ovlp_perc_aln1_tf|boolean that returns TRUE if `ovlp_perc_aln1` <= `qmaxoverlap` in the overlapping case. If separated, this automatically returns TRUE.|
+|aln0_bp|The inferred breakpoint position of gene0.|
+|aln0_bp_win_tf|boolean if the gene0 breakpoint is within the breakpoint window per the `-bpw, --bpwin` argument.|
+|aln1_bp|The inferred breakpoint position of gene1.|
+|aln1_bp_win_tf|boolean if the gene1 breakpoint is within the breakpoint window per the `-bpw, --bpwin` argument.|
+|in_fus_mast_tf|boolean if the detected fusion resides in the fusion master per `-fm, --fusionmaster`. Returns TRUE if it exists and FALSE if it does not. Defaults to TRUE if no fusion master is provided through the `-nfm, --no_fusion_master` argument.|
+|overall_filt_tf|boolean if it passed all read calculated filters (`aln_dist_rd_tf`, `target_dist_tf`, `ovlp_perc_aln0_tf`, `ovlp_perc_aln1_tf`, `aln0_bp_win_tf`, `aln1_bp_win_tf`). If `-nf, --no_filt` is used, this defaults to TRUE.|
+|ct|The number of passing supporting reads ie those reads with `overall_filt_tf` == TRUE.|
+|ct_tf|boolean returning TRUE if the number of passing supporting reads are >= `-mnc, --mincount`.|
+|overall_tf|boolean returning TRUE if the read is TRUE for `overall_filt_tf`, `in_fus_mast_tf`, and, `ct_tf`. This is the final flag used to determine fusions returned from FUSILLI.|
 
 
 
