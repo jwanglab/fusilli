@@ -245,7 +245,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("B-ALL fusion caller based on ONT RNA-seq", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-p", "--paf", help="PAF of reads to hg38 (mm2 -x map-ont)")
 
-    parser.add_argument("-b", "--bed", help="BED file including target genes, default is BED file specific for B-ALL", default='./data/peds_leuk_genes.240422.bed')
+    parser.add_argument("-b", "--bed", help="BED file including target genes, default is BED file specific for B-ALL", default='./data/fusilli.bed')
     parser.add_argument("-fm", "--fusionmaster", help="tab-delimited file with fusion genes of interest, default is file for B-ALL fusions", default='./data/ball_fusion_master.txt')
     parser.add_argument("-nfm", "--no_fusion_master", action='store_false', help="if included argument, any gene pairs from the bed file are considered")
     parser.add_argument("-o", "--outpath", help="if included argument, output path for fusion detection output", default='')
