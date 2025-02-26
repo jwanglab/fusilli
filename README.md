@@ -95,15 +95,15 @@ For both PAF and BED files (described below), chromosome names should correspond
 1. `-b, --bed`
 
 BED (browser extensible data, extension `.bed`), tab-delimited file including the target genes of interest.
-The required columns of the BED file are `chromosome`, `genomic_start_position`, `genomic end position`, `gene name`.
+The required columns of the BED file are `chromosome`, `genomic_start_position`, `genomic_end_position`, `gene_name`.
 The default BED file contains genes relevant to B-ALL.
 
 
 BED File Example:
 
 ```
-NC_000009.12	130663881	130937675	ABL1
-NC_000001.11	179049327	179279684	ABL2
+NC_000009.12	130713042	130887675	ABL1
+NC_000001.11	179099329	179229677	ABL2
 ...
 ```
 
