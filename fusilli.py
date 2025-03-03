@@ -36,7 +36,7 @@ def read_fmaster(fusion_master_file):
     return result
 
 
-def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_overlap, max_gene_overlap, bp_win, qmax_overlap, filt, min_ct, rep):
+def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_overlap, max_gene_overlap, bp_win, qmax_overlap, filt, min_ct, rep, pre):
     
     if rep and outpath == '':
         raise("ERROR: The report option was enabled but no -o argument was provided for the output path! Please provide an output path when using -r.")
@@ -44,7 +44,10 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     genes = read_bed(bed_file)
     fm_list = read_fmaster(fm_file)
     hits = defaultdict(list)
-    sample_id=paf_file.split('/')[-1].split('.paf')[0]
+    if pre:
+        sample_id = pre
+    else:
+        sample_id = paf_file.split('/')[-1].split('.paf')[0]
     if outpath != '':
         outpath1 = outpath + '/' + sample_id + '_fusilli.txt'
     with tqdm(total=sum(1 for _ in open(paf_file)), desc="analyzing the PAF file at " + paf_file + "...") as pbar:
@@ -258,6 +261,8 @@ if __name__ == "__main__":
     parser.add_argument("-nf", "--no_filt", action='store_false', help="if included argument, no filters applied, (except for mincount)")
     parser.add_argument("-mnc", "--mincount", type=int, help="minimum number reads to count as a fusion", default=2)
     parser.add_argument("-r", "--report",  action='store_true', help="if included argument, a report will be generated of all reads, what filters passed and whether they are fusions not included in a fusion master")
+    parser.add_argument("-pr", "--prefix",  help="prefix for file output")
+
     
     args = parser.parse_args()
 
@@ -274,5 +279,6 @@ if __name__ == "__main__":
          args.qmaxoverlap,
          args.no_filt,
          args.mincount,
-         args.report
+         args.report,
+         args.prefix
          )
