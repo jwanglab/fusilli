@@ -217,6 +217,8 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     results['ct'] = results['ct'].fillna(0)
     results['ct_tf'] = results['ct'].apply(lambda x: x >= min_ct)
     results['overall_tf'] = np.where((results['overall_filt_tf'] == True) & (results['in_fus_mast_tf'] == True) & (results['ct_tf'] == True), True, False)
+    # ?? drop duplicates in results (because of redundant portion up above)
+    results = results.drop_duplicates()
 
     if outpath != '':
         orig_stdout = sys.stdout
