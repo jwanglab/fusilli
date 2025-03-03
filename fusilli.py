@@ -93,7 +93,7 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     f6b = []
     f7b = []
     fus = []
-    # fo = []
+
     for read in hits: 
         # a single query ie read can have multiple alignments or mappings in the genome
         # qe is query end and qs is query start with respect to the read! so a read starts at 0 ... length(read)
@@ -113,16 +113,18 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                     if genes[g][0] == c0 and ga_calc.ga_ovlp(genes[g][1], genes[g][2], a0) > min_anchor: ## ?? this may not necessarily cover the breakpoint...ex if aln is entirely within gene
                         g0l.append(g)
                         # g0 = g
-                        g0_c = genes[g][0]
+                        g0_c = chroms[genes[g][0]]
                         g0_s = genes[g][1]
                         g0_e = genes[g][2]
                     if genes[g][0] == c1 and ga_calc.ga_ovlp(genes[g][1], genes[g][2], a1) > min_anchor:
                         g1l.append(g)
-                        g1_c = genes[g][0]
+                        g1_c = chroms[genes[g][0]]
                         g1_s = genes[g][1]
                         g1_e = genes[g][2]
                 # only consider genes on different alignments...an alignment can have multiple genes...but here we only consider gene pairs from different alignments ie g0 from a0 and g1 from a1
                 # ?? this is a limitation of the software...the only way to get metrics for multiple genes from the same target alignment is to rerun the mapping with a reference broken down by gene target starts and ends
+                # ?? this is also slightly redundant since comparisons being made here that are duplicates when alignments on same chromsome and map to multiple genes
+                # ?? to address the above, consider merging fusion detection portion with the alignment portion of the code above when hits are being generated
                 for k in range(len(g0l)): 
                     g0 = g0l[k]
                     for l in range(len(g1l)):
@@ -211,6 +213,8 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
     # count the number of distinct passing-all-filters reads supporting each fusion 
     ct_lkup = results.loc[results.overall_filt_tf == True, ['fusion', 'read_query']].groupby('fusion')['read_query'].nunique().reset_index(name='ct')
     results['ct'] = results['fusion'].map(ct_lkup.set_index('fusion')['ct'])
+    # set ct to 0 if no reads pass all filters
+    results['ct'] = results['ct'].fillna(0)
     results['ct_tf'] = results['ct'].apply(lambda x: x >= min_ct)
     results['overall_tf'] = np.where((results['overall_filt_tf'] == True) & (results['in_fus_mast_tf'] == True) & (results['ct_tf'] == True), True, False)
 
