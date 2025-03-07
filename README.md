@@ -185,6 +185,10 @@ The `-o, --outpath` MUST be supplied to access the report.
 The dataframe will output to a tab-delimited, file in the specified directory ending in `_fusilli_read_summary.txt`
 See below for more details.
 
+12. `-pr", "--prefix`
+
+If included, the specified string here will override the default prefix (as in the supplied PAF file) and will be used instead as the prefix for output files (`_fusilli.txt` and `_fusilli_read_summary.txt` files).
+
 ## FUSILLI Tutorial
 
 For this tutorial, let's look at sample with a known fusion, ETV6::RUNX1, determined through conventional clinical testing.
