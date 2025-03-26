@@ -227,13 +227,11 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
         if results.overall_tf.any():
             results_sub = results.loc[results.overall_tf == True, ['fusion', 'ct']].drop_duplicates().sort_values(by='ct', ascending=False)
             for index, row in results_sub.iterrows():
-                print(row.fusion[0] + "\t" + row.fusion[1] + "\t" + str(row.ct))
-        else:
-            print("No fusions detected!")
-        if rep:
-            results.to_csv(outpath + '/' + sample_id + '_fusilli_read_summary.txt', sep="\t", index=False)
+                print(sample_id + "\t" + row.fusion[0] + "\t" + row.fusion[1] + "\t" + str(row.ct))
         sys.stdout = orig_stdout
         fo.close()
+        if rep:
+            results.to_csv(outpath + '/' + sample_id + '_fusilli_read_summary.txt', sep="\t", index=False)
 
     print()
     print("---------------------------")
