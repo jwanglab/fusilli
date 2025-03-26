@@ -134,11 +134,12 @@ FUSILLI will automatically generate a file named with the prefix on the PAF file
 Sample `_fusilli.txt` file:
 
 ```
-CRLF2	P2RY8	20
-PAX5	ZCCHC7	14
+sample_123	CRLF2	P2RY8	20
+sample_123	PAX5	ZCCHC7	14
 ```
 
-where the first two columns represent partner genes and the third column is the number of distinct supporting reads.
+where the first column is the sample name, columns two and three represent partner genes and the fourth column is the number of distinct supporting reads.
+Columns are tab-separated.
 
 4. `-a, --anchor: default=50`
 
