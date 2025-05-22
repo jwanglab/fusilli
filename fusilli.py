@@ -43,13 +43,16 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
 
     genes = read_bed(bed_file)
     fm_list = read_fmaster(fm_file)
-    hits = defaultdict(list)
+    hits = {}
     if pre:
         sample_id = pre
     else:
         sample_id = paf_file.split('/')[-1].split('.paf')[0]
     if outpath != '':
         outpath1 = outpath + '/' + sample_id + '_fusilli.txt'
+    # this is the key we are using to represent a unique alignment
+    # each line in the PAF file should be a unique alignment
+    paf_idx = 0
     with tqdm(total=sum(1 for _ in open(paf_file)), desc="analyzing the PAF file at " + paf_file + "...") as pbar:
         with open(paf_file) as pf:
             for line in pf:
@@ -65,13 +68,16 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                     for g in genes:
                         #...and the gene overlaps with the alignment by at least min_anchor...
                         if genes[g][0] == c and ga_calc.ga_ovlp(genes[g][1], genes[g][2], a) > min_anchor:
+                            # hits[a.q][paf_idx] = a
                             #...add the alignment to the hits dictionary with the query sequence hash as the key
                             if a.q in hits:
-                                hits[a.q].append(a)
+                                hits[a.q][paf_idx] = a
                             else:
                                 # hits is a default dict of form hits = [(a.q, [alignments])] where a.q is the key ie query sequence hash followed by list of alignments
-                                hits[a.q] = [a]
+                                hits[a.q] = {}
+                                hits[a.q][paf_idx] = a
                 pbar.update(1)
+                paf_idx += 1
 
     rs = []
     rls = []
@@ -98,10 +104,12 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
         # a single query ie read can have multiple alignments or mappings in the genome
         # qe is query end and qs is query start with respect to the read! so a read starts at 0 ... length(read)
         for i in range(len(hits[read])): # len of hits[read] is the number of alignments associated with given query seq hash/read
-            a0 = hits[read][i] # a0 is the ith or first alignment...this is basically a line from the PAF file
+            ikey = list(hits[read].keys())[i] # get the ith key of the alignment
+            a0 = hits[read][ikey] # a0 is the ith or first alignment...this is basically a line from the PAF file
             c0 = chr_idx[a0.t] # a0.t is the corresponding target sequence name ie chromosome, so c0 is the index of the chr...chr1 --> 0, chr2 --> 1 etc
             for j in range(i+1, len(hits[read])): # for the NEXT (ie i+1) read associated with the given query....also get the alignment and chr index
-                a1 = hits[read][j]
+                jkey = list(hits[read].keys())[j] # get the jth key of the alignment
+                a1 = hits[read][jkey]
                 c1 = chr_idx[a1.t]
                 g0 = None
                 g1 = None
@@ -122,9 +130,7 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                         g1_s = genes[g][1]
                         g1_e = genes[g][2]
                 # only consider genes on different alignments...an alignment can have multiple genes...but here we only consider gene pairs from different alignments ie g0 from a0 and g1 from a1
-                # ?? this is a limitation of the software...the only way to get metrics for multiple genes from the same target alignment is to rerun the mapping with a reference broken down by gene target starts and ends
-                # ?? this is also slightly redundant since comparisons being made here that are duplicates when alignments on same chromsome and map to multiple genes
-                # ?? to address the above, consider merging fusion detection portion with the alignment portion of the code above when hits are being generated
+                # ?? this is a limitation of the software...the only way to get metrics for multiple genes from the same target alignment (in order to evaluate various filters) is to rerun the mapping with a reference broken down by gene target starts and ends instead of chromosome target starts and ends
                 for k in range(len(g0l)): 
                     g0 = g0l[k]
                     for l in range(len(g1l)):
