@@ -36,14 +36,18 @@ def read_fmaster(fusion_master_file):
     return result
 
 
-def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_overlap, max_gene_overlap, bp_win, qmax_overlap, filt, min_ct, rep, pre):
+def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_overlap, max_gene_overlap, bp_win, qmax_overlap, filt, min_ct, rep, pre, ofp):
     
     if rep and outpath == '':
         raise("ERROR: The report option was enabled but no -o argument was provided for the output path! Please provide an output path when using -r.")
 
+    if ofp and outpath == '':
+        raise("ERROR: The output filtered PAF option was enabled but no -o argument was provided for the output path! Please provide an output path when using -ofp.")
+
     genes = read_bed(bed_file)
     fm_list = read_fmaster(fm_file)
     hits = {}
+    store_lines = []
     if pre:
         sample_id = pre
     else:
@@ -231,9 +235,19 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
         fo = open(outpath1, 'w')
         sys.stdout = fo
         if results.overall_tf.any():
-            results_sub = results.loc[results.overall_tf == True, ['fusion', 'ct']].drop_duplicates().sort_values(by='ct', ascending=False)
+            results_sub0 = results.loc[results.overall_tf == True, ]
+            results_sub = results_sub0[['fusion', 'ct']].drop_duplicates().sort_values(by='ct', ascending=False)
             for index, row in results_sub.iterrows():
                 print(sample_id + "\t" + row.fusion[0] + "\t" + row.fusion[1] + "\t" + str(row.ct))
+            if ofp:
+                with tqdm(total=len(store_lines), desc="writing filtered PAF file at " + outpath + '/' + sample_id + '_filtered.paf' + "...") as pbar2:
+                    with open(outpath + '/' + sample_id + '_filtered.paf', 'w') as opaf:
+                        for line in store_lines:
+                            a = paf.aln(line)
+                            if a.q in results_sub0.read_query.values:
+                                opaf.write(line)
+                            pbar2.update(1)
+                    opaf.close()
         sys.stdout = orig_stdout
         fo.close()
         if rep:
@@ -251,6 +265,7 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
         print("No fusions detected!")
     print()
     print("finished!")
+
 
 
 
@@ -272,6 +287,7 @@ if __name__ == "__main__":
     parser.add_argument("-mnc", "--mincount", type=int, help="minimum number reads to count as a fusion", default=2)
     parser.add_argument("-r", "--report",  action='store_true', help="if included argument, a report will be generated of all reads, what filters passed and whether they are fusions not included in a fusion master")
     parser.add_argument("-pr", "--prefix",  help="prefix for file output")
+    parser.add_argument("-ofp", "--output_filtered_paf", action='store_true', help="if included argument, will output a filtered PAF file with only the alignments that pass the filters for fusion visualization. suffix is _filtered.paf")
 
     
     args = parser.parse_args()
@@ -290,5 +306,6 @@ if __name__ == "__main__":
          args.no_filt,
          args.mincount,
          args.report,
-         args.prefix
+         args.prefix,
+         args.output_filtered_paf
          )
