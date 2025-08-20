@@ -186,9 +186,14 @@ The `-o, --outpath` MUST be supplied to access the report.
 The dataframe will output to a tab-delimited, file in the specified directory ending in `_fusilli_read_summary.txt`
 See below for more details.
 
-12. `-pr", "--prefix`
+12. `-pr, --prefix`
 
-If included, the specified string here will override the default prefix (as in the supplied PAF file) and will be used instead as the prefix for output files (`_fusilli.txt` and `_fusilli_read_summary.txt` files).
+If included, the specified string here will override the default prefix (as in the supplied PAF file) and will be used instead as the prefix for output files (`_fusilli.txt` and/or `_fusilli_read_summary.txt` and/or `_filtered.paf` files).
+
+13. `-ofp, --output_filtered_paf`
+
+If included, FUSILLI will output a filtered PAF file, filtered to the fusion-supporting reads (only reads which pass filtering criteria as specified).
+The filtered PAF file could be used for fusion visualization in https://jwanglab.org/fusion/ and would be faster to process.
 
 ## FUSILLI Tutorial
 
