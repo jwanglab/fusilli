@@ -70,6 +70,8 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                     break
                 # if the target sequence name is in the list of chromosomes we are interested in...
                 if a.t in chr_idx:
+                    if 'NC' not in a.t:
+                        print("WARNING: Target sequence name " + a.t + " does not appear to be in the correct format, should be like NC_000001.11 for hg38! Double check your PAF file for alignment to reference genome with RefSeq chr names!")
                     c = chr_idx[a.t]
                     for g in genes:
                         #...and the gene overlaps with the alignment by at least min_anchor...
