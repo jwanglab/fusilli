@@ -63,6 +63,8 @@ def main(paf_file, bed_file, fm_file, nfusm, outpath, min_anchor, max_gap, max_o
                 # create aln object from each line in the paf file
                 try:
                     a = paf.aln(line)
+                    if ofp:
+                        store_lines.append(line)
                 except:
                     print("WARNING: PAF file has bad format or is truncated, stopped reading it here!")
                     break
